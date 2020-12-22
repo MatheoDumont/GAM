@@ -212,20 +212,21 @@ int Mesh::in_circumscribed_cercle(int idx_triangle, int idx_point) const
     int i_r = triangles[idx_triangle].s[2];
     Point s = sommets[idx_point].p;
 
-    Point p = sommets[i_p].p;
+    // on calcul les points par rapport a p considere comme le centre
+    // du paraboloid
+    // q et r centrer par rapport a p
     Point q = sommets[i_q].p;
     Point r = sommets[i_r].p;
+    Point p = sommets[i_p].p;
 
     // on les remontes dans le saladier
-    p._z = (p._x * p._x) + (p._y * p._y);
-    q._z = (q._x * q._x) + (q._y * q._y);
-    r._z = (r._x * r._x) + (r._y * r._y);
-    s._z = (s._x * s._x) + (s._y * s._y);
+    p._z = 0.;
+    q._z = ((q._x - p._x) * (q._x - p._x)) + ((q._y - p._y) * (q._y - p._y));
+    r._z = ((r._x - p._x) * (r._x - p._x)) + ((r._y - p._y) * (r._y - p._y));
+    s._z = ((s._x - p._x) * (s._x - p._x)) + ((s._y - p._y) * (s._y - p._y));
 
-    Point ss = p - s;
     Point normal = cross(q - p, r - p);
-
-    float dir = dot(normal, ss);
+    float dir = dot(normal, p - s);
 
     if (dir == 0.f)
         return 0;
@@ -234,6 +235,7 @@ int Mesh::in_circumscribed_cercle(int idx_triangle, int idx_point) const
 
     return -1;
 }
+
 int Mesh::locate_triangle_iterative(int idx_p) const
 {
     const Point &pt = sommets[idx_p].p;
