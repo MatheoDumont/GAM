@@ -226,11 +226,11 @@ int Mesh::in_circumscribed_cercle(int idx_triangle, int idx_point) const
     s._z = ((s._x - p._x) * (s._x - p._x)) + ((s._y - p._y) * (s._y - p._y));
 
     Point normal = cross(q - p, r - p);
-    float dir = dot(normal, p - s);
+    float dir = dot(normal, s - p);
 
     if (dir == 0.f)
         return 0;
-    else if (dir > 0)
+    else if (dir < 0)
         return 1;
 
     return -1;
