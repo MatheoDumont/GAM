@@ -92,8 +92,15 @@ void GeometricWorld::drawWireFrame()
     this->_mesh.drawMeshWireFrame();
 }
 
+void GeometricWorld::drawVoronoi()
+{
+    this->_mesh.drawMeshWireFrame();
+    this->_mesh.draw_voronoi();
+}
+
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
+
     // Point infini
     this->make_inf_point();
 
@@ -118,7 +125,13 @@ Mesh::Mesh() : laplaciens(), sommets(), triangles()
 
     // this->edge_flip(0, 1);
     // add_delaunay_point(Point(0.25, 0.25, 0.f));
-    load_and_add_delaunay("data/franke4.off");
+    // load_and_add_delaunay("data/franke4.off");
+    // Point R = Point(0.4, 0.4, 0.f);
+    // Point L = Point(0.5, -1., 0.);
+    // Point D = Point(-1., -1., 0.);
+    // add_delaunay_point(R);
+    // add_delaunay_point(L);
+    // add_delaunay_point(D);
 }
 
 void Mesh::drawMesh()
@@ -154,42 +167,94 @@ void Mesh::drawMesh()
     }
 }
 
+void Mesh::drawCircle(int i_t)
+{
+    const Triangle &t = triangles[i_t];
+
+    Point centre = triangles[i_t].get_barycenter(sommets);
+    double radius = norm(centre - sommets[t.s[0]].p);
+    float step = 6.28 / 1000;
+    Point border(radius, 0., 0.);
+
+    glBegin(GL_LINE_STRIP);
+    for (float angle = 0.f; angle < 6.28; angle += step)
+    {
+        Point p;
+        p._x = border._x * cos(step) - border._y * sin(step);
+        p._y = border._x * sin(step) + border._y * cos(step);
+        border = p;
+        glVertex3d(border._x + centre._x, border._y + centre._y, 0.f);
+    }
+    glEnd();
+}
+
 void Mesh::drawMeshWireFrame()
 {
     for (unsigned int i = 0; i < this->triangles.size(); ++i)
     {
+        glColor3f(1., 1., 1.);
 
-        if (i == triangles.size() - 2)
+        if (triangles[i].is_inf)
         {
-            glColor3f(0., 1., 0.);
+            glColor3f(1., 1., 0.);
         }
-        else if (i == triangles.size() - 1)
-        {
-            glColor3f(0., 0., 1.);
-        }
-        else if (triangles[i].is_inf)
-        {
-            glColor3f(1., 1., 1.);
-        }
-        else
-        {
-            glColor3f(1., 0., 0.);
-        }
+        // else
+        // {
+        //     drawCircle(i);
+        // }
 
         glBegin(GL_LINE_STRIP);
-
         glPointDraw(sommets[triangles[i].s[0]].p);
         glPointDraw(sommets[triangles[i].s[1]].p);
         glEnd();
+
         glBegin(GL_LINE_STRIP);
         glPointDraw(sommets[triangles[i].s[1]].p);
         glPointDraw(sommets[triangles[i].s[2]].p);
         glEnd();
+
         glBegin(GL_LINE_STRIP);
         glPointDraw(sommets[triangles[i].s[2]].p);
         glPointDraw(sommets[triangles[i].s[0]].p);
-
         glEnd();
+    }
+}
+
+void Mesh::draw_voronoi()
+{
+    for (int i = 0; i < triangles.size(); ++i)
+    {
+        float k = 10;
+        const Triangle &t = triangles[i];
+        Point p = triangles[i].get_barycenter(sommets);
+
+        glColor3f(1., 0., 0.);
+
+        if (!t.is_inf)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                bool draw = false;
+                glBegin(GL_LINE_STRIP);
+                glPointDraw(p);
+
+                Point pp;
+                if (!triangles[t.adj3[j]].is_inf)
+                    pp = triangles[t.adj3[j]].get_barycenter(sommets);
+                else
+                {
+                    // prendre comme direction la normale a la mediatrice du segment viser
+                    Point mediatrice = (sommets[t.s[(j + 1) % 3]].p + sommets[t.s[(j + 2) % 3]].p) / 2.f;
+                    Point dir = normalize(mediatrice - p);
+                    if (in_triangle(i, p) == 1)
+                        pp = p + (k * dir);
+                    else
+                        pp = p + (k * (Point() - dir));
+                }
+                glPointDraw(pp);
+                glEnd();
+            }
+        }
     }
 }
 

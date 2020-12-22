@@ -15,19 +15,14 @@ void Mesh::make_infinite_triangles()
 {
     int s = triangles.size();
     for (int i = 0; i < s; ++i)
-    {
         for (int j = 0; j < 3; ++j)
-        {
             if (triangles[i].adj3[j] == -1)
             {
-
                 triangles.emplace_back(triangles[i].s[(j + 2) % 3],
                                        triangles[i].s[(j + 1) % 3],
                                        Mesh::IDX_INF_POINT,
                                        /* triangle infini*/ true);
             }
-        }
-    }
     make_adjacence();
 }
 
@@ -73,7 +68,6 @@ void Mesh::triangle_split(int idx_triangle, int idx_sommet, bool is_inf)
     {
         // parmis tous ses sommets, lequel regarde idx_triangle
         int triangle_adj0_som = triangles[triangle_adj0].which_adjacence(idx_triangle);
-
         triangles[triangle_adj0].adj3[triangle_adj0_som] = idx_t3;
     }
 
@@ -82,7 +76,6 @@ void Mesh::triangle_split(int idx_triangle, int idx_sommet, bool is_inf)
     if (triangle_adj1 != -1)
     {
         int triangle_adj1_som = triangles[triangle_adj1].which_adjacence(idx_triangle);
-
         triangles[triangle_adj1].adj3[triangle_adj1_som] = idx_triangle;
     }
 
@@ -91,14 +84,6 @@ void Mesh::triangle_split(int idx_triangle, int idx_sommet, bool is_inf)
     if (triangle_adj2 != -1)
     {
         int triangle_adj2_som = triangles[triangle_adj2].which_adjacence(idx_triangle);
-        // for (int i = 0; i < 3; ++i)
-        // {
-        //     if (triangles[triangle_adj2].adj3[i] == idx_triangle)
-        //     {
-        //         triangle_adj2_som = i;
-        //         break;
-        //     }
-        // }
         triangles[triangle_adj2].adj3[triangle_adj2_som] = idx_t2;
     }
 }
@@ -220,32 +205,35 @@ int Mesh::in_triangle(int t, const Point &p) const
     return 1;
 }
 
-int Mesh::in_circumscribed_cercle(int i_p, int i_q, int i_r, const Point &s) const
+int Mesh::in_circumscribed_cercle(int idx_triangle, int idx_point) const
 {
-    // on calcul les points par rapport a p considere comme le centre
-    // du paraboloid
+    int i_p = triangles[idx_triangle].s[0];
+    int i_q = triangles[idx_triangle].s[1];
+    int i_r = triangles[idx_triangle].s[2];
+    Point s = sommets[idx_point].p;
+
     Point p = sommets[i_p].p;
-    p._z = 0.;
+    Point q = sommets[i_q].p;
+    Point r = sommets[i_r].p;
 
-    // q et r centre
-    Point q = sommets[i_q].p - p;
+    // on les remontes dans le saladier
+    p._z = (p._x * p._x) + (p._y * p._y);
     q._z = (q._x * q._x) + (q._y * q._y);
-    Point r = sommets[i_r].p - p;
     r._z = (r._x * r._x) + (r._y * r._y);
-    Point ss = s - p;
-    ss._z = (s._x * s._x) + (s._y * s._y);
+    s._z = (s._x * s._x) + (s._y * s._y);
 
-    float dir = -dot(cross(q - p, r - p), ss - p);
+    Point ss = p - s;
+    Point normal = cross(q - p, r - p);
+
+    float dir = dot(normal, ss);
 
     if (dir == 0.f)
         return 0;
     else if (dir > 0)
         return 1;
 
-    // dir < 0
     return -1;
 }
-
 int Mesh::locate_triangle_iterative(int idx_p) const
 {
     const Point &pt = sommets[idx_p].p;
@@ -355,24 +343,20 @@ void Mesh::add_delaunay_point(Point p)
 
     if (idx_t == -1 || triangles[idx_t].is_inf) // pas dans l'enveloppe convex
     {
-        // std::cout << "PAS DANS L'ENVELOPPE" << std::endl;
 
         Mesh::Circulator_on_faces cfbegin = this->incident_faces(sommets[IDX_INF_POINT]);
         Mesh::Circulator_on_faces cf = cfbegin;
         int idx_triangle_splitted = -1;
 
-        // on cherche le triangle dans lequel on split
-        do
+        do // on cherche le triangle dans lequel on split
         {
-            std::cout << "DO" << std::endl;
             int idx_s_inf_on_face = cf->which_vertex(IDX_INF_POINT);
 
             if (orientation(cf->s[(idx_s_inf_on_face + 2) % 3],
                             cf->s[(idx_s_inf_on_face + 1) % 3],
                             idx_s) == 1)
+            // LE TRIANGLE REMONTE DANS LENVELOPPE CONVEX COMME ETANT NON INF
             {
-                // LE TRIANGLE REMONTE DANS LENVELOPPE CONVEX COMME ETANT NON INF
-                std::cout << " Triangle split : " << cf.idx << std::endl;
 
                 triangle_split(cf.idx, idx_s, true /*tous infini*/);
 
@@ -466,48 +450,15 @@ void Mesh::add_delaunay_point(Point p)
 
     else // dans l'enveloppe convex
     {
-        std::cout << "DANS L'ENVELOPPE" << std::endl;
-
         // ON CONSIDERE T1 COMME ETANT LE TRIANGLE AYANT DEJA SUBIT DES
-        // POTENTIELS FLIP, DONC T2 EST CELUI A PEUT ETRE MODIFIER
+        // POTENTIELS FLIP, DONC T2 EST CELUI A MODIFIER PEUT ETRE
 
-        // std::pair<triangle1, triangle2>
-        std::queue<std::pair<int, int>> queue;
-        std::pair<int, int> p;
-
-        // std::cout << " SPLIT : " << idx_t << " Pour le point : " << idx_s << std::endl;
-        // std::cout << "AVANT" << std::endl;
-        // std::cout << "=====================================" << std::endl;
-        // for (int i = 0; i < sommets.size(); ++i)
-        // {
-        //     std::cout << "[" << i << "]" << std::endl;
-        //     std::cout << sommets[i] << std::endl;
-        // }
-        // for (int i = 0; i < triangles.size(); ++i)
-        // {
-        //     std::cout << "[" << i << "]" << std::endl;
-        //     std::cout << triangles[i] << std::endl;
-        // }
-        // std::cout << "=====================================" << std::endl;
-
-        // SPLIT
         triangle_split(idx_t, idx_s, false);
-        // std::cout << "APRES" << std::endl;
-        // std::cout << "=====================================" << std::endl;
-        // for (int i = 0; i < sommets.size(); ++i)
-        // {
-        //     std::cout << "[" << i << "]" << std::endl;
-        //     std::cout << sommets[i] << std::endl;
-        // }
-        // for (int i = 0; i < triangles.size(); ++i)
-        // {
-        //     std::cout << "[" << i << "]" << std::endl;
-        //     std::cout << triangles[i] << std::endl;
-        // }
-        // std::cout << "=====================================" << std::endl;
-        // std::cout << "+++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 
-        // INIT queue with 3 edges of the splitted section
+        std::queue<std::pair<int, int>> queue;
+
+        // INIT queue avec des pairs de triangles :
+        // les triangles issuent du split et leurs triangles adjacent par rapport au point insere.
         int s_in_idxt = triangles[idx_t].which_vertex(idx_s);
         queue.push({idx_t, triangles[idx_t].adj3[s_in_idxt]});
 
@@ -521,7 +472,7 @@ void Mesh::add_delaunay_point(Point p)
 
         while (!queue.empty())
         {
-            p = queue.front();
+            std::pair<int, int> p = queue.front();
             queue.pop();
             int idx_t1 = p.first;
             int idx_t2 = p.second;
@@ -530,31 +481,20 @@ void Mesh::add_delaunay_point(Point p)
             if (triangles[idx_t1].is_inf || triangles[idx_t2].is_inf)
                 continue;
 
+            // donc en idx_t1 dans les pairs, idx_t1 toujours le triangle avec le sommet ajoute.
             int idx_s_de_t2_adj_t1 = triangles[idx_t2].which_adjacence(idx_t1);
 
-            if (in_circumscribed_cercle(triangles[idx_t1].s[0],
-                                        triangles[idx_t1].s[1],
-                                        triangles[idx_t1].s[2],
-                                        sommets[triangles[idx_t2].s[idx_s_de_t2_adj_t1]].p) &&
+            if (in_circumscribed_cercle(idx_t1, triangles[idx_t2].s[idx_s_de_t2_adj_t1]) == 1 &&
                 is_flippable(idx_t1, idx_t2))
             {
-                // std::cout << "=====================================================" << std::endl;
 
-                // std::cout << "ON FLIP t1 : " << idx_t1 << " ET t2 : " << idx_t2 << std::endl;
                 edge_flip(idx_t1, idx_t2);
-                // std::cout << "FLIPPED" << std::endl;
-                // for (int i = 0; i < triangles.size(); ++i)
-                // {
-                //     std::cout << "[" << i << "]" << std::endl;
-                //     std::cout << triangles[i] << std::endl;
-                // }
 
                 int s_in_first = triangles[idx_t1].which_vertex(idx_s);
-                int s_in_second = triangles[idx_t2].which_vertex(idx_s);
-
                 if (s_in_first != -1)
                     queue.push({idx_t1, triangles[idx_t1].adj3[s_in_first]});
 
+                int s_in_second = triangles[idx_t2].which_vertex(idx_s);
                 if (s_in_second != -1)
                     queue.push({idx_t2, triangles[idx_t2].adj3[s_in_second]});
             }
@@ -583,7 +523,6 @@ void Mesh::load_and_add_delaunay(std::string file)
     {
         myfile >> v1 >> v2 >> v3;
         Point p(v1, v2, 0.);
-        std::cout << p << std::endl;
         this->add_delaunay_point(p);
     }
 

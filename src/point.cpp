@@ -47,7 +47,7 @@ Point operator+(const Point &p1, const Point &p2)
     return Point(p1._x + p2._x, p1._y + p2._y, p1._z + p2._z);
 }
 
-float norm(const Point &p)
+double norm(const Point &p)
 {
     return sqrt((p._x * p._x) +
                 (p._y * p._y) +
@@ -59,7 +59,7 @@ Point normalize(const Point &p)
     return p / norm(p);
 }
 
-float dot(const Point &p1, const Point &p2)
+double dot(const Point &p1, const Point &p2)
 {
     return (p1._x * p2._x) + (p1._y * p2._y) + (p1._z * p2._z);
 }

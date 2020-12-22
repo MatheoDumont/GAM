@@ -22,6 +22,13 @@ std::ostream &operator<<(std::ostream &o, const Sommet &s);
 
 struct Triangle
 {
+private:
+    bool is_barycenter_computed = false;
+    Point _barycenter;
+
+    void compute_barycenter(const std::vector<Sommet> &ss);
+
+public:
     /*
     * Sommet Definit dans le sens trigonometrique, 
     * donc :
@@ -57,6 +64,8 @@ struct Triangle
     int which_vertex(int idx_sommet);
 
     int which_adjacence(int idx_triangle);
+
+    Point get_barycenter(const std::vector<Sommet> &ss);
 };
 std::ostream &operator<<(std::ostream &o, const Triangle &t);
 

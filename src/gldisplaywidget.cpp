@@ -8,17 +8,18 @@
 
 #include "QDebug"
 
-GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(0)
+GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(2)
 {
     // Update the scene
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
     _timer.start(16); // Starts or restarts the timer with a timeout interval of 16 milliseconds.
-    // file.open("data/franke4.off");
-    // std::string entete;
-    // file >> entete;
 
-    // int vertices = 0, faces = 0, bidon = 0;
-    // file >> vertices >> faces >> bidon;
+    file.open("data/franke4.off");
+    std::string entete;
+    file >> entete;
+
+    int vertices, faces, bidon;
+    file >> vertices >> faces >> bidon;
 }
 
 void GLDisplayWidget::initializeGL()
@@ -68,6 +69,8 @@ void GLDisplayWidget::paintGL()
         _geomWorld.draw();
     else if (_type_display == 1)
         _geomWorld.drawWireFrame();
+    else if (_type_display == 2)
+        _geomWorld.drawVoronoi();
 }
 
 void GLDisplayWidget::resizeGL(int width, int height)
@@ -90,11 +93,11 @@ void GLDisplayWidget::mousePressEvent(QMouseEvent *event)
 
     if (event->button() == Qt::RightButton)
     {
-        // double v1, v2, v3;
-        // file >> v1 >> v2 >> v3;
-        // Point p(v1, v2, 0.);
-        // std::cout << p << std::endl;
-        // _geomWorld._mesh.add_delaunay_point(p);
+        double v1, v2, v3;
+        file >> v1 >> v2 >> v3;
+        Point p(v1, v2, 0.);
+        std::cout << p << std::endl;
+        _geomWorld._mesh.add_delaunay_point(p);
 
         // float x = _lastPosMouse.x() - geometry().width() / 2.0f;
         // float y = (geometry().height() - _lastPosMouse.y()) - geometry().height() / 2.0f;

@@ -34,9 +34,13 @@ public:
     //~Mesh(); // Destructor automatically called before a Mesh is destroyed (default strategy)
 
     // BASE FUNCTIONS
+    void drawCircle(int i_t);
+
     void drawMesh();
 
     void drawMeshWireFrame();
+
+    void draw_voronoi();
 
     void tetrahedron();
 
@@ -110,14 +114,16 @@ public:
     int in_triangle(int t, const Point &p) const;
 
     /*
-     * Predicat qui indique si s est en dessous ou au dessus. du plan definit par le
-     * triangle represente par les points p q et r.
+     * idx_triangle indice du triangle dans triangles
+     * idx_point indice du point dans sommets
+     * Predicat qui indique si point est en dessous ou au dessus. du plan definit par le
+     * triangle (represente par les points p = idx 0, q = idx 1 et r = idx 2)
      * Remonte les points sur un paraboloid centre en p.
      * return 0 si sur la bordure
      * return 1 si a l'interieur
      * return -1 si a l'exterieur
      */
-    int in_circumscribed_cercle(int i_p, int i_q, int i_r, const Point &s) const;
+    int in_circumscribed_cercle(int idx_triangle, int idx_point) const;
 
     /*
      * Methode qui retourne le triangle dans lequel est inclut le point p.
@@ -264,6 +270,8 @@ public:
     void draw();
 
     void drawWireFrame();
+
+    void drawVoronoi();
 
     // ** TP Can be extended with further elements;
     Mesh _mesh;

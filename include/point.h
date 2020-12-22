@@ -28,9 +28,9 @@ Point operator/(const Point &p, float k);
 
 Point operator+(const Point &p1, const Point &p2);
 
-float norm(const Point &p);
+double norm(const Point &p);
 Point normalize(const Point &p);
-float dot(const Point &p1, const Point &p2);
+double dot(const Point &p1, const Point &p2);
 Point cross(const Point &p1, const Point &p2);
 
 std::ostream &operator<<(std::ostream &o, const Point &p);
