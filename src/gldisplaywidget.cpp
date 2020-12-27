@@ -8,7 +8,7 @@
 
 #include "QDebug"
 
-GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(2)
+GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(3)
 {
     // Update the scene
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
@@ -20,6 +20,7 @@ GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y
 
     int vertices, faces, bidon;
     file >> vertices >> faces >> bidon;
+    resizeGL(1280, 720);
 }
 
 void GLDisplayWidget::initializeGL()
@@ -71,6 +72,8 @@ void GLDisplayWidget::paintGL()
         _geomWorld.drawWireFrame();
     else if (_type_display == 2)
         _geomWorld.drawVoronoi();
+    else if (_type_display == 3)
+        _geomWorld.dawContourCrust();
 }
 
 void GLDisplayWidget::resizeGL(int width, int height)

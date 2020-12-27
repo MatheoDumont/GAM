@@ -98,11 +98,25 @@ void GeometricWorld::drawVoronoi()
     this->_mesh.draw_voronoi();
 }
 
+void GeometricWorld::dawContourCrust()
+{
+    _mesh.display_contour_crust();
+}
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
 
     // Point infini
     this->make_inf_point();
+    boite_englobante();
+    std::vector<Point> pts = load_points_cloud("data/bunny2d.xy");
+    for (auto p : pts)
+    {
+        // std::cout << p << std::endl;
+        add_delaunay_point(p);
+    }
+    crust();
+
+    // load_from_file("data/bunny.off");
 
     // this->tetrahedron();
     // load_from_file("data/queen.off");
@@ -126,9 +140,6 @@ Mesh::Mesh() : laplaciens(), sommets(), triangles()
 
 void Mesh::drawMesh()
 {
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    std::uniform_real_distribution<> dis(0.f, 1.0f);
 
     for (unsigned int i = 0; i < this->triangles.size(); ++i)
     {
@@ -145,7 +156,7 @@ void Mesh::drawMesh()
         //     glColor3f(1., 0., 0.);
         // }
 
-        glColor3f(dis(gen), dis(gen), dis(gen));
+        glColor3f(t.color._x, t.color._y, t.color._z);
 
         glPointDraw(sommets[t.s[0]].p);
 
@@ -317,10 +328,8 @@ void Mesh::make_adjacence()
     {
 
         for (int j = 0; j < 3; ++j)
-        {
             if (sommets[triangles[i].s[j]].t == -1)
                 sommets[triangles[i].s[j]].t = i;
-        }
 
         // liaison du sommet i_s vers i_s_l
         for (int i_s = 0; i_s < 3; ++i_s)
@@ -334,9 +343,7 @@ void Mesh::make_adjacence()
                 this->triangles[ite->second.first].adj3[ite->second.second] = i;
             }
             else
-            {
                 connected_faces.insert({{this->triangles[i].s[i_s], this->triangles[i].s[i_s_l]}, {i, (i_s_l + 1) % 3}});
-            }
         }
     }
 }
@@ -413,4 +420,29 @@ void Mesh::compute_laplaciens()
     {
         this->laplaciens.push_back(Algorithm::laplacien(*this, *ite_vertices));
     }
+}
+
+std::vector<Point> Mesh::load_points_cloud(std::string f)
+{
+    std::ifstream myfile;
+    myfile.open(f);
+
+    int vertices, bidon;
+    double v1, v2;
+
+    if (!myfile.is_open())
+    {
+        std::cout << "file marche pas" << std::endl;
+    }
+
+    myfile >> vertices >> bidon >> bidon;
+
+    std::vector<Point> pts;
+    pts.reserve(vertices);
+    for (int i = 0; i < vertices; ++i)
+    {
+        myfile >> v1 >> v2;
+        pts.emplace_back(v1, v2, 0.);
+    }
+    return pts;
 }

@@ -20,6 +20,7 @@
 
 class Mesh
 {
+
     static const int IDX_INF_POINT = 0;
 
     // (Q ou STL)Vector of vertices
@@ -48,8 +49,13 @@ public:
 
     void load_from_file(std::string);
 
-    // LAPLACIENS
+    std::vector<Point> load_points_cloud(std::string f);
+
+    /*==================== Mesh Curvature ====================*/
+
     void compute_laplaciens();
+
+    /*==================== Mesh Triangulation ====================*/
 
     // TRIANGULATIONS
     void make_inf_point();
@@ -143,6 +149,13 @@ public:
 
     // construit la boite englobante, utile pour insertion seulement dans l'enveloppe convex
     void boite_englobante();
+
+    void check_adjacence();
+
+    /*==================== Mesh Reconstruction ====================*/
+
+    void crust();
+    void display_contour_crust();
 
     typedef std::vector<Sommet>::iterator Iterator_on_vertices;
     typedef std::vector<Triangle>::iterator Iterator_on_faces;
@@ -277,6 +290,8 @@ public:
     void drawWireFrame();
 
     void drawVoronoi();
+
+    void dawContourCrust();
 
     // ** TP Can be extended with further elements;
     Mesh _mesh;

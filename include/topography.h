@@ -3,6 +3,11 @@
 
 #include "point.h"
 #include <vector>
+#include <random>
+
+static std::random_device rd;  //Will be used to obtain a seed for the random number engine
+static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+static std::uniform_real_distribution<> dis(0.f, 1.0f);
 
 struct Sommet
 {
@@ -25,6 +30,7 @@ struct Triangle
 private:
     bool is_barycenter_computed = false;
     Point _barycenter;
+    
 
     void compute_barycenter(const std::vector<Sommet> &ss);
 
@@ -53,6 +59,8 @@ public:
     int adj3[3] = {-1, -1, -1};
 
     bool is_inf = false;
+
+    Point color = Point(dis(gen), dis(gen), dis(gen));
 
     Triangle(int _s1, int _s2, int _s3) : s{_s1, _s2, _s3}, is_inf(false) {}
 

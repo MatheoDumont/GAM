@@ -242,7 +242,7 @@ int Mesh::locate_triangle_iterative(int idx_p) const
 
     for (int i = 0; i < triangles.size(); ++i)
     {
-        if (in_triangle(i, pt) == 1)
+        if (in_triangle(i, pt) >= 0)
             return i;
     }
     return -1;
@@ -405,8 +405,8 @@ void Mesh::add_delaunay_point(Point p)
             if (orientation(
                     sommets[triangles[idx_triangle_adj2].s[idx_sommet2_triangle_adj2_pas_infini]].p,
                     sommets[idx_s].p,
-                    sommets[triangles[idx_triangle_adj2].s[idx_sommet_triangle_adj2_pointe_sur_triangle_adj1]].p) == 1 &&
-                is_flippable(idx_triangle_adj1, idx_triangle_adj2))
+                    sommets[triangles[idx_triangle_adj2].s[idx_sommet_triangle_adj2_pointe_sur_triangle_adj1]].p) == 1)
+            //&& is_flippable(idx_triangle_adj1, idx_triangle_adj2)
             {
 
                 edge_flip(idx_triangle_adj1, idx_triangle_adj2);
@@ -436,8 +436,7 @@ void Mesh::add_delaunay_point(Point p)
             if (orientation(
                     sommets[triangles[idx_triangle_adj2].s[idx_sommet2_triangle_adj2_pas_infini]].p,
                     sommets[triangles[idx_triangle_adj2].s[idx_sommet_triangle_adj2_pointe_sur_triangle_adj1]].p,
-                    sommets[idx_s].p) == 1 &&
-                is_flippable(idx_triangle_adj1, idx_triangle_adj2))
+                    sommets[idx_s].p) == 1) //&& is_flippable(idx_triangle_adj1, idx_triangle_adj2)
             {
 
                 edge_flip(idx_triangle_adj1, idx_triangle_adj2);
@@ -546,19 +545,49 @@ void Mesh::incremental_delaunay(Point p)
             this->make_infinite_triangles();
         }
     }
+    else
+    {
+        add_delaunay_point(p);
+        check_adjacence();
+    }
 
-    add_delaunay_point(p);
+    // check_adjacence();
 }
 
 void Mesh::boite_englobante()
 {
-    sommets.emplace_back(0.f, 0.f, 0.f);
-    sommets.emplace_back(1.f, 0.f, 0.f);
-    sommets.emplace_back(0.f, 1.f, 0.f);
-    sommets.emplace_back(1.f, 1.f, 0.f);
+    double k = 100000.;
+    sommets.emplace_back(-k, -k, 0.f);
+    sommets.emplace_back(k, -k, 0.f);
+    sommets.emplace_back(-k, k, 0.f);
+    sommets.emplace_back(k, k, 0.f);
+    // sommets.emplace_back(0.f, 0.f, 0.f);
+    // sommets.emplace_back(k, 0.f, 0.f);
+    // sommets.emplace_back(0.f, k, 0.f);
+    // sommets.emplace_back(k, k, 0.f);
 
     triangles.emplace_back(1, 2, 3);
     triangles.emplace_back(2, 4, 3);
     this->make_adjacence();
     this->make_infinite_triangles();
+}
+
+void Mesh::check_adjacence()
+{
+    for (int j = 0; j < triangles.size(); ++j)
+    {
+        const Triangle &t = triangles[j];
+        for (int i = 0; i < 3; ++i)
+        {
+            if (triangles[t.adj3[i]].which_adjacence(j) == -1)
+            {
+                std::cout << "ERROR" << std::endl
+                          << "l'un adj mais pas l'autre " << std::endl
+                          << triangles[i]
+                          << triangles[t.adj3[i]]
+                          << std::endl;
+                break;
+            }
+        }
+    }
 }

@@ -48,6 +48,7 @@ set(SOURCES
   src/point.cpp
   src/topography.cpp
   src/mesh_triangulation.cpp
+  src/mesh_reconstruction.cpp
   ${INCLUDES}
 )
 
@@ -73,16 +74,18 @@ target_link_libraries(
   ${Qt5Gui_OPENGL_LIBRARIES}
   )
 
-configure_file(
-  data/cube.off ${CMAKE_CURRENT_BINARY_DIR}/data/cube.off COPYONLY
-)
+file(COPY "data" DESTINATION ${PROJECT_BINARY_DIR})
 
-configure_file(
-  data/queen.off ${CMAKE_CURRENT_BINARY_DIR}/data/queen.off COPYONLY
-)
+# configure_file(
+#   data/cube.off ${CMAKE_CURRENT_BINARY_DIR}/data/cube.off COPYONLY
+# )
 
-configure_file(
-  data/franke4.off ${CMAKE_CURRENT_BINARY_DIR}/data/franke4.off COPYONLY
-)
+# configure_file(
+#   data/queen.off ${CMAKE_CURRENT_BINARY_DIR}/data/queen.off COPYONLY
+# )
+
+# configure_file(
+#   data/franke4.off ${CMAKE_CURRENT_BINARY_DIR}/data/franke4.off COPYONLY
+# )
 
 
