@@ -104,16 +104,6 @@ Mesh::Mesh() : laplaciens(), sommets(), triangles()
     // Point infini
     this->make_inf_point();
 
-    sommets.emplace_back(0.f, 0.f, 0.f);
-    sommets.emplace_back(1.f, 0.f, 0.f);
-    sommets.emplace_back(0.f, 1.f, 0.f);
-    sommets.emplace_back(1.f, 1.f, 0.f);
-
-    triangles.emplace_back(1, 2, 3);
-    triangles.emplace_back(2, 4, 3);
-    this->make_adjacence();
-    this->make_infinite_triangles();
-
     // this->tetrahedron();
     // load_from_file("data/queen.off");
     // load_from_file("data/cube.off");

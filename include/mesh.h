@@ -139,6 +139,11 @@ public:
 
     void load_and_add_delaunay(std::string file);
 
+    void incremental_delaunay(Point p);
+
+    // construit la boite englobante, utile pour insertion seulement dans l'enveloppe convex
+    void boite_englobante();
+
     typedef std::vector<Sommet>::iterator Iterator_on_vertices;
     typedef std::vector<Triangle>::iterator Iterator_on_faces;
 

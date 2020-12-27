@@ -97,7 +97,8 @@ void GLDisplayWidget::mousePressEvent(QMouseEvent *event)
         file >> v1 >> v2 >> v3;
         Point p(v1, v2, 0.);
         std::cout << p << std::endl;
-        _geomWorld._mesh.add_delaunay_point(p);
+        // _geomWorld._mesh.add_delaunay_point(p);
+        _geomWorld._mesh.incremental_delaunay(p);
 
         // float x = _lastPosMouse.x() - geometry().width() / 2.0f;
         // float y = (geometry().height() - _lastPosMouse.y()) - geometry().height() / 2.0f;

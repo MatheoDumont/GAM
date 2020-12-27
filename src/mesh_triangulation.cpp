@@ -177,10 +177,10 @@ int Mesh::orientation(const Point &p, const Point &q, const Point &r) const
 
     // Point p11 = p3 - p1;
     // Point p21 = p2 - p1;
-
-    Point p1 = Point(r._x, r._y, 0.f) - Point(p._x, p._y, 0.f);
-    Point p2 = Point(q._x, q._y, 0.f) - Point(p._x, p._y, 0.f);
-    float dir = (p1._x * p2._y) - (p1._y * p2._x);
+    Point p_prim = Point(p._x, p._y, 0.);
+    Point pr = Point(r._x, r._y, 0.f) - p_prim;
+    Point pq = Point(q._x, q._y, 0.f) - p_prim;
+    float dir = (pr._x * pq._y) - (pr._y * pq._x);
 
     if (dir == 0.f)
         return 0;
@@ -529,4 +529,36 @@ void Mesh::load_and_add_delaunay(std::string file)
     }
 
     myfile.close();
+}
+
+void Mesh::incremental_delaunay(Point p)
+{
+    if (sommets.size() <= 2 + 1)
+    {
+        sommets.emplace_back(p);
+        if (sommets.size() == 3 + 1)
+        {
+            if (orientation(1, 2, 3) == -1)
+                triangles.emplace_back(1, 2, 3);
+            else
+                triangles.emplace_back(1, 3, 2);
+
+            this->make_infinite_triangles();
+        }
+    }
+
+    add_delaunay_point(p);
+}
+
+void Mesh::boite_englobante()
+{
+    sommets.emplace_back(0.f, 0.f, 0.f);
+    sommets.emplace_back(1.f, 0.f, 0.f);
+    sommets.emplace_back(0.f, 1.f, 0.f);
+    sommets.emplace_back(1.f, 1.f, 0.f);
+
+    triangles.emplace_back(1, 2, 3);
+    triangles.emplace_back(2, 4, 3);
+    this->make_adjacence();
+    this->make_infinite_triangles();
 }
