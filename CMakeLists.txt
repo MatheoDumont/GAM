@@ -49,6 +49,7 @@ set(SOURCES
   src/topography.cpp
   src/mesh_triangulation.cpp
   src/mesh_reconstruction.cpp
+  src/mesh_refinement.cpp
   ${INCLUDES}
 )
 

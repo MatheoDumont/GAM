@@ -157,6 +157,12 @@ public:
     void crust();
     void display_contour_crust();
 
+    /*==================== Mesh Refinement ====================*/
+
+    void ruppert();
+    void split_segment(std::pair<int,int> s);
+
+
     typedef std::vector<Sommet>::iterator Iterator_on_vertices;
     typedef std::vector<Triangle>::iterator Iterator_on_faces;
 

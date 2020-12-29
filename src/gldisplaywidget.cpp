@@ -8,7 +8,7 @@
 
 #include "QDebug"
 
-GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(3)
+GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(1)
 {
     // Update the scene
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
@@ -101,7 +101,7 @@ void GLDisplayWidget::mousePressEvent(QMouseEvent *event)
         Point p(v1, v2, 0.);
         std::cout << p << std::endl;
         // _geomWorld._mesh.add_delaunay_point(p);
-        _geomWorld._mesh.incremental_delaunay(p);
+        // _geomWorld._mesh.incremental_delaunay(p);
 
         // float x = _lastPosMouse.x() - geometry().width() / 2.0f;
         // float y = (geometry().height() - _lastPosMouse.y()) - geometry().height() / 2.0f;

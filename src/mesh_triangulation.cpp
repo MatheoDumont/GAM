@@ -261,7 +261,7 @@ int Mesh::locate_triangle_fourmis(int idx_p) const
     // int current_t = std::uniform_int_distribution<int>(0, triangles.size())(generator);
     int current_t = 0;
 
-    if (in_triangle(current_t, pt) == 1)
+    if (in_triangle(current_t, pt) >= 0)
         return current_t;
 
     int previous_t = -1;
@@ -290,7 +290,7 @@ int Mesh::locate_triangle_fourmis(int idx_p) const
         if (set.find(current_t) != set.end())
             return -1; // on est deja venue sur ce triangle avant
 
-        if (in_triangle(current_t, pt) == 1)
+        if (in_triangle(current_t, pt) >= 0)
         {
             if (triangles[current_t].is_inf)
                 return -1;
@@ -341,11 +341,12 @@ void Mesh::add_delaunay_point(Point p)
     sommets.emplace_back(p);
     int idx_s = sommets.size() - 1;
     int idx_t = -1;
-    idx_t = locate_triangle_iterative(idx_s);
+    idx_t = locate_triangle_fourmis(idx_s);
+    // assert(idx_t != -1 /* ON ne trouve pas le triangle contenant le point */);
 
     if (idx_t == -1 || triangles[idx_t].is_inf) // pas dans l'enveloppe convex
     {
-
+        std::cout << "OUTSIDE" << std::endl;
         Mesh::Circulator_on_faces cfbegin = this->incident_faces(sommets[IDX_INF_POINT]);
         Mesh::Circulator_on_faces cf = cfbegin;
         int idx_triangle_splitted = -1;
@@ -376,9 +377,14 @@ void Mesh::add_delaunay_point(Point p)
                 }
                 else
                 {
-                    triangles.back().is_inf = false;
+                    triangles[triangles.size() - 1].is_inf = false;
                     idx_triangle_splitted = triangles.size() - 1;
                 }
+                std::cout << triangles[cf.idx] << std ::endl
+                          << triangles[triangles.size() - 2] << std::endl
+                          << triangles[triangles.size() - 1] << std::endl;
+
+                std::cout << "===========================================" << std::endl;
 
                 break;
             }
@@ -412,9 +418,9 @@ void Mesh::add_delaunay_point(Point p)
                 edge_flip(idx_triangle_adj1, idx_triangle_adj2);
 
                 if (triangles[idx_triangle_adj1].which_vertex(idx_sommet2_triangle_adj2_pas_infini) != -1)
-                    triangles[idx_triangle_adj1].is_inf = false;
-                else
                     triangles[idx_triangle_adj2].is_inf = false;
+                else
+                    triangles[idx_triangle_adj1].is_inf = false;
             }
         }
 
@@ -451,6 +457,8 @@ void Mesh::add_delaunay_point(Point p)
 
     else // dans l'enveloppe convex
     {
+        std::cout << "INSIDE" << std::endl;
+
         // ON CONSIDERE T1 COMME ETANT LE TRIANGLE AYANT DEJA SUBIT DES
         // POTENTIELS FLIP, DONC T2 EST CELUI A MODIFIER PEUT ETRE
 
@@ -550,8 +558,6 @@ void Mesh::incremental_delaunay(Point p)
         add_delaunay_point(p);
         check_adjacence();
     }
-
-    // check_adjacence();
 }
 
 void Mesh::boite_englobante()
@@ -588,6 +594,26 @@ void Mesh::check_adjacence()
                           << std::endl;
                 break;
             }
+        }
+    }
+    // check si un triangle est inf sans avoir le point 0 dans ses sommets
+    for (int i = 0; i < triangles.size(); ++i)
+    {
+        const Triangle &t = triangles[i];
+        bool point_inf_dans_sommets = false;
+        for (int j = 0; j < triangles.size(); ++j)
+            if (t.s[j] == IDX_INF_POINT)
+            {
+                point_inf_dans_sommets = true;
+                break;
+            }
+
+        if ((point_inf_dans_sommets && !t.is_inf) ||
+            (!point_inf_dans_sommets && t.is_inf))
+        {
+            std::cout << "!! Incoherence !!" << std::endl;
+            std::cout << t << std::endl;
+            break;
         }
     }
 }

@@ -90,6 +90,7 @@ void GeometricWorld::drawWireFrame()
     glPointDraw(_bBox[3]);
     glEnd();
     this->_mesh.drawMeshWireFrame();
+    // this->_mesh.drawMesh();
 }
 
 void GeometricWorld::drawVoronoi()
@@ -102,19 +103,14 @@ void GeometricWorld::dawContourCrust()
 {
     _mesh.display_contour_crust();
 }
+
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
-
     // Point infini
     this->make_inf_point();
     boite_englobante();
-    std::vector<Point> pts = load_points_cloud("data/bunny2d.xy");
-    for (auto p : pts)
-    {
-        // std::cout << p << std::endl;
-        add_delaunay_point(p);
-    }
-    crust();
+    ruppert();
+    // crust();
 
     // load_from_file("data/bunny.off");
 
@@ -147,16 +143,16 @@ void Mesh::drawMesh()
 
         glBegin(GL_TRIANGLES);
 
-        // if (triangles[i].is_inf)
-        // {
-        //     glColor3f(1., 1., 1.);
-        // }
-        // else
-        // {
-        //     glColor3f(1., 0., 0.);
-        // }
+        if (triangles[i].is_inf)
+        {
+            glColor3f(1., 1., 1.);
+        }
+        else
+        {
+            glColor3f(1., 0., 0.);
+        }
 
-        glColor3f(t.color._x, t.color._y, t.color._z);
+        // glColor3f(t.color._x, t.color._y, t.color._z);
 
         glPointDraw(sommets[t.s[0]].p);
 
