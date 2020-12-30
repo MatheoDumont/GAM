@@ -14,10 +14,10 @@ private:
 
 public:
     static std::vector<Point> vertices_laplacien(Mesh &m);
-    static Point laplacien(Mesh &m, Sommet &s);
+    static Point laplacien(Mesh &m, Sommet &sommet);
 
-    static float aire_triangle(const Point &a, const Point &b, const Point &c);
-    static float aire_triangle(const std::vector<Sommet> &v_s, const Triangle &t);
+    static double aire_triangle(const Point &a, const Point &b, const Point &c);
+    static double aire_triangle(const std::vector<Sommet> &v_s, const Triangle &t);
 
     static Point normal_from_laplacien(const Point &laplacien);
 

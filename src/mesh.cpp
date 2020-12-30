@@ -104,13 +104,18 @@ void GeometricWorld::dawContourCrust()
     _mesh.display_contour_crust();
 }
 
+void GeometricWorld::drawCourbure()
+{
+    _mesh.drawLaplacien();
+}
+
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
     // Point infini
     this->make_inf_point();
-    boite_englobante();
-    ruppert();
-    // crust();
+    boite_englobante(100);
+    // ruppert();
+    crust();
 
     // load_from_file("data/bunny.off");
 
@@ -136,7 +141,6 @@ Mesh::Mesh() : laplaciens(), sommets(), triangles()
 
 void Mesh::drawMesh()
 {
-
     for (unsigned int i = 0; i < this->triangles.size(); ++i)
     {
         Triangle &t = triangles[i];
@@ -151,13 +155,41 @@ void Mesh::drawMesh()
         {
             glColor3f(1., 0., 0.);
         }
-
         // glColor3f(t.color._x, t.color._y, t.color._z);
 
         glPointDraw(sommets[t.s[0]].p);
 
         glPointDraw(sommets[t.s[1]].p);
 
+        glPointDraw(sommets[t.s[2]].p);
+
+        glEnd();
+    }
+}
+
+void Mesh::drawLaplacien()
+{
+
+    for (unsigned int i = 0; i < this->triangles.size(); ++i)
+    {
+        Triangle &t = triangles[i];
+
+        glBegin(GL_TRIANGLES);
+        float k = 3.0f;
+        float l = norm(laplaciens[t.s[0]]) * k;
+        // l = std::pow(l, 0.2);
+        float x = (l - min_curvature) / (max_curvature - min_curvature);
+        glColor3f(x, 0., 1.0 - x);
+        glPointDraw(sommets[t.s[0]].p);
+
+        l = norm(laplaciens[t.s[1]]) * k;
+        x = (l - min_curvature) / (max_curvature - min_curvature);
+        glColor3f(x, 0., 1.0 - x);
+        glPointDraw(sommets[t.s[1]].p);
+
+        l = norm(laplaciens[t.s[2]]) * k;
+        x = (l - min_curvature) / (max_curvature - min_curvature);
+        glColor3f(x, 0., 1.0 - x);
         glPointDraw(sommets[t.s[2]].p);
 
         glEnd();
@@ -411,11 +443,21 @@ void Mesh::compute_laplaciens()
 
     Mesh::Iterator_on_vertices ite_vertices = this->vertices_begin();
     Mesh::Iterator_on_vertices ite_vertices_end = this->vertices_end();
+    double laplacien_min = 1000, laplacien_max = -1000;
 
     for (; ite_vertices != ite_vertices_end; ++ite_vertices)
     {
         this->laplaciens.push_back(Algorithm::laplacien(*this, *ite_vertices));
+        Point b = laplaciens.back();
+        double n = norm(b);
+
+        // b = Algorithm::curvature_from_laplacien(b);
+        laplacien_min = std::min(laplacien_min, n);
+        laplacien_max = std::max(laplacien_max, n);
     }
+
+    max_curvature = laplacien_max;
+    min_curvature = laplacien_min;
 }
 
 std::vector<Point> Mesh::load_points_cloud(std::string f)

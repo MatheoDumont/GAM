@@ -4,6 +4,7 @@
 #include "point.h"
 #include <vector>
 #include <random>
+#include <array>
 
 static std::random_device rd;  //Will be used to obtain a seed for the random number engine
 static std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -30,7 +31,6 @@ struct Triangle
 private:
     bool is_barycenter_computed = false;
     Point _barycenter;
-    
 
     void compute_barycenter(const std::vector<Sommet> &ss);
 
@@ -68,12 +68,22 @@ public:
 
     void update_3adj(int t1, int t2, int t3);
 
-    int which_vertex(std::vector<Sommet> &ss, Sommet &o);
-    int which_vertex(int idx_sommet);
+    int which_vertex(const std::vector<Sommet> &ss, const Sommet &o) const;
+    int which_vertex(int idx_sommet) const;
 
-    int which_adjacence(int idx_triangle);
+    int which_adjacence(int idx_triangle) const;
 
     Point get_barycenter(const std::vector<Sommet> &ss);
+
+    /*
+     * float[0] = angle au point 0
+     * float[1] = angle au point 1
+     * float[2] = angle au point 2
+     */
+    std::array<float, 3> angles(const std::vector<Sommet> &ss) const;
+
+    float lowest_angle(const std::vector<Sommet> &ss) const;
+
 };
 std::ostream &operator<<(std::ostream &o, const Triangle &t);
 

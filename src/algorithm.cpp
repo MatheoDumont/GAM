@@ -1,6 +1,6 @@
 #include "algorithm.h"
 
-float Algorithm::aire_triangle(const Point &a, const Point &b, const Point &c)
+double Algorithm::aire_triangle(const Point &a, const Point &b, const Point &c)
 {
     //https://fr.wikipedia.org/wiki/Aire_d%27un_triangle
     Point ab = b - a;
@@ -14,65 +14,109 @@ float Algorithm::aire_triangle(const Point &a, const Point &b, const Point &c)
     return 0.5f * norm(cross(ab, ac));
 }
 
-float Algorithm::aire_triangle(const std::vector<Sommet> &v_s, const Triangle &t)
+double Algorithm::aire_triangle(const std::vector<Sommet> &v_s, const Triangle &t)
 {
     return Algorithm::aire_triangle(v_s[t.s[0]].p, v_s[t.s[1]].p, v_s[t.s[2]].p);
 }
 
-Point Algorithm::laplacien(Mesh &m, Sommet &s)
+float cos_geom(const Point &a, const Point &i, const Point &j)
 {
-    int idx_sommet = m.triangles[s.t].s[m.triangles[s.t].which_vertex(m.sommets, s)];
+    Point ai = normalize(i - a);
+    Point aj = normalize(j - a);
+    return dot(ai, aj);
+}
 
-    // Sommet &s = m.sommets[idx_sommet];
-    Point &i = s.p;
+float sin_geom(const Point &a, const Point &i, const Point &j)
+{
+    Point ai = i - a;
+    Point aj = j - a;
+    float length_ai = norm(ai);
 
-    float aire = 0;
-    Point u_laplacien;
+    return (length_ai * length_ai) - dot(ai, aj) / length_ai;
+}
 
-    Mesh::Circulator_on_faces circ_faces = m.incident_faces(s);
+float cot_geom(const Point &a, const Point &i, const Point &j)
+{
+    return cos_geom(a, i, j) / sin_geom(a, i, j);
+}
+
+double cot_geom_2(const Point &i, const Point &j, const Point &angle_point)
+{
+
+    Point a = normalize(i - angle_point);
+    Point b = normalize(j - angle_point);
+
+    double cos_t = dot(a, b);
+    double sin_t = norm(cross(a, b));
+
+    return cos_t / sin_t;
+}
+
+double clamp(double min, double max, double x)
+{
+    if (x >= max)
+        return max;
+    else if (x <= min)
+        return min;
+
+    return x;
+}
+// http://rodolphe-vaillant.fr/?e=33
+// http://rodolphe-vaillant.fr/?e=69
+Point Algorithm::laplacien(Mesh &m, Sommet &sommet)
+{
+    int idx_sommet = m.triangles[sommet.t].s[m.triangles[sommet.t].which_vertex(m.sommets, sommet)];
+
+    Mesh::Circulator_on_faces circ_faces = m.incident_faces(sommet);
     Mesh::Circulator_on_faces circ_faces_begin = circ_faces;
 
-    std::vector<Triangle> faces;
-
+    double aire = 0.0;
     do
     {
         aire += Algorithm::aire_triangle(m.sommets, *circ_faces);
-        faces.push_back(*circ_faces);
         ++circ_faces;
-
     } while (circ_faces != circ_faces_begin);
-    aire = aire * (1 / 3.0f);
 
-    for (int v = 1; v < faces.size(); ++v)
+    aire = aire * (1.0 / 3.0) * 2.0;
+    aire = 1.0 / aire;
+
+    Mesh::Circulator_on_faces circ_faces_p = m.incident_faces(sommet);
+    Mesh::Circulator_on_faces circ_faces_begin_p = circ_faces_p;
+
+    Mesh::Circulator_on_faces circ_faces_after_p = m.incident_faces(sommet);
+    ++circ_faces_after_p;
+
+    Point u_laplacien;
+    const Point &i = sommet.p;
+
+    do
     {
-        Triangle &t = faces[v - 1];
-        int i_in_face = t.which_vertex(idx_sommet);
-        Point &k = m.sommets[t.s[(i_in_face + 1) % 3]].p;
-        Point &j = m.sommets[t.s[(i_in_face + 2) % 3]].p;
+        const Triangle &t_precedent = m.triangles[circ_faces_p.idx];
+        const Triangle &t_suivant = m.triangles[circ_faces_after_p.idx];
 
-        t = faces[v];
-        i_in_face = t.which_vertex(idx_sommet);
-        Point &kk = m.sommets[t.s[(i_in_face + 2) % 3]].p;
+        int i_dans_t_prec = t_precedent.which_vertex(idx_sommet);
+        int i_dans_t_suiv = t_suivant.which_vertex(idx_sommet);
 
-        // vecteurs direction
-        Point ji = j - i;
-        float length_ji = norm(ji);
-        Point ki = i - k;
-        Point kki = i - kk;
+        const Point &k = m.sommets[t_precedent.s[(i_dans_t_prec + 1) % 3]].p;
+        const Point &j = m.sommets[t_precedent.s[(i_dans_t_prec + 2) % 3]].p;
+        const Point &kk = m.sommets[t_suivant.s[(i_dans_t_suiv + 2) % 3]].p;
 
-        // https: //stackoverflow.com/questions/3738384/stable-cotangent
-        // sinon arc cos = acos
-        float cot_alpha = norm(ki) / length_ji;
-        float cot_beta = norm(kki) / length_ji;
-        // std::cout << "alpha " << cot_alpha << std::endl;
-        // std::cout << "beta " << cot_beta << std::endl;
+        // float cot_alpha = cot_geom(k, i, j);
+        // float cot_beta = cot_geom(kk, i, j);
 
-        u_laplacien = u_laplacien + (cot_alpha + cot_beta) * (ji);
-        // std::cout << "laplacien " << u_laplacien << std::endl;
-    }
+        float cot_alpha = cot_geom_2(i, j, k);
+        float cot_beta = cot_geom_2(i, j, kk);
 
-    // return 0.5f * std::max(0.001f, aire) * u_laplacien;
-    return (float)(1/(2 * aire)) * u_laplacien;
+        float weight = cot_alpha + cot_beta;
+
+        u_laplacien = u_laplacien + weight * (i - j);
+
+        ++circ_faces_p;
+        ++circ_faces_after_p;
+
+    } while (circ_faces_p != circ_faces_begin_p);
+
+    return aire * u_laplacien;
 }
 
 std::vector<Point> Algorithm::vertices_laplacien(Mesh &m)

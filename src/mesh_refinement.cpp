@@ -1,8 +1,14 @@
 #include "mesh.h"
 #include "point.h"
+#include <cmath>
+#include <array>
+#include <unordered_set>
 
 typedef std::pair<int, int> Segment;
 
+// https://stackoverflow.com/questions/20590656/error-for-hash-function-of-pair-of-ints
+
+// Graphe planaire de ligne droite
 struct PSLG
 {
     std::vector<Point> points;
@@ -32,31 +38,111 @@ PSLG input()
     g.segments.push_back({6, 7});
     g.segments.push_back({7, 8});
 
+    // point inf et points boite englobante
     for (int i = 0; i < g.segments.size(); ++i)
     {
         g.segments[i].first += 5;
         g.segments[i].second += 5;
     }
+    // bounding box
+    g.segments.push_back({1, 2});
+    g.segments.push_back({1, 3});
+    g.segments.push_back({2, 4});
+    g.segments.push_back({3, 4});
 
     return g;
 }
-// https://fr.qaz.wiki/wiki/Ruppert's_algorithm
 
-void Mesh::ruppert()
+std::pair<int, float> Mesh::worst_triangles_angle() const
+{
+    int idx_worst = 0;
+    float worst_angle = triangles[0].lowest_angle(sommets);
+
+    for (int i = 1; i < triangles.size(); ++i)
+    {
+        if (triangles[i].is_inf)
+            continue;
+        float a = triangles[i].lowest_angle(sommets);
+        if (a < worst_angle)
+        {
+            idx_worst = i;
+            worst_angle = a;
+        }
+    }
+    return {idx_worst, worst_angle};
+}
+
+void Mesh::in_circum_to_segments(const Point &p,
+                                 const std::unordered_set<Segment, pairhash> &segments,
+                                 std::unordered_set<Segment, pairhash> &out) const
+{
+    for (const Segment &s : segments)
+    {
+        const Point &p1 = sommets[s.first].p;
+        const Point &p2 = sommets[s.second].p;
+        Point centre = (p1 + p2) / 2;
+        float radius = norm(p1 - p2) / 2;
+
+        if (norm(p - centre) - radius < 0.f)
+            out.insert(s);
+    }
+}
+
+// https://fr.qaz.wiki/wiki/Ruppert's_algorithm
+void Mesh::ruppert(float angle_min)
 {
     PSLG graph_input = input();
+
     for (auto p : graph_input.points)
         incremental_delaunay(p);
 
-    std::cout << triangles.size() << std::endl;
-    split_segment(graph_input.segments[0]);
-    std::cout << triangles.size() << std::endl;
-
     // tant que un triangle avec un angle inferieur a un seuil voulu existe
     // on split_segment les segment dans lequel apparait le centre du cercle circonscrit au triangle
+    std::unordered_set<Segment, pairhash> segments(graph_input.segments.begin(), graph_input.segments.end());
+
+    std::unordered_set<Segment, pairhash> segs_to_split;
+    for (int i = 0; i < triangles.size(); ++i)
+    {
+        if (triangles[i].is_inf)
+            continue;
+        in_circum_to_segments(triangles[i].get_barycenter(sommets), segments, segs_to_split);
+    }
+
+    int compteur = 0;
+    bool stop;
+    do
+    {
+        stop = true;
+
+        for (Segment s : segs_to_split)
+        {
+            std::array<Segment, 2> ss = split_segment(s);
+            segments.insert(ss[0]);
+            segments.insert(ss[1]);
+        }
+        segs_to_split.clear();
+        break;
+        std::pair<int, float> worst = worst_triangles_angle();
+        std::cout << worst.first << ", " << worst.second << std::endl;
+        if (worst.second < angle_min)
+        {
+            stop = false;
+            const Point &barycentre = triangles[worst.first].get_barycenter(sommets);
+
+            // on met a jour segs_to_split
+            in_circum_to_segments(barycentre, segments, segs_to_split);
+
+            if (segs_to_split.size() == 0) // si aucun
+                incremental_delaunay(barycentre);
+        }
+        compteur++;
+        if (compteur == 2)
+            stop = true;
+
+    } while (stop == false);
 }
 
-void Mesh::split_segment(Segment s)
+std::array<Segment, 2> Mesh::split_segment(Segment s)
 {
     /*
      * On commence par trouver le triangle avec le segment
@@ -83,6 +169,9 @@ void Mesh::split_segment(Segment s)
     }
     assert(idx_triangle_haut != -1);
 
+   
+
+    
     Triangle ancien_triangle_haut = triangles[idx_triangle_haut];
     int idx_rel_sommet_haut_gauche = ancien_triangle_haut.which_vertex(s.first);
     int idx_rel_sommet_haut_droite = ancien_triangle_haut.which_vertex(s.second);
@@ -97,9 +186,7 @@ void Mesh::split_segment(Segment s)
         idx_rel_sommet_haut_gauche = idx_rel_sommet_haut_droite;
         idx_rel_sommet_haut_droite = tmp;
     }
-    /*
-     * En faite on modifie 4 triangles, vu qu'il ya 2 triangles sur un edges, on doit modifier les 2 et creer 2 autres.
-     */
+    //En faite on modifie 4 triangles, vu qu'il ya 2 triangles sur un edges, on doit modifier les 2 et creer 2 autres.
     int idx_triangle_bas = ancien_triangle_haut.adj3[(idx_rel_sommet_haut_droite + 1) % 3];
     Triangle ancien_triangle_bas = triangles[idx_triangle_bas];
 
@@ -107,6 +194,7 @@ void Mesh::split_segment(Segment s)
     median = median / 2;
     sommets.emplace_back(median);
     int idx_median = sommets.size() - 1;
+    sommets[idx_median].t = idx_triangle_haut;
 
     // On cree les triangles et change les sommets
     // HAUT
@@ -167,4 +255,6 @@ void Mesh::split_segment(Segment s)
     triangles[idx_new_triangle_haut_droite] = new_triangle_haut_droite;
     triangles[idx_triangle_bas] = new_triangle_bas_gauche;
     triangles[idx_new_triangle_bas_droite] = new_triangle_bas_droite;
+    
+    return {Segment(s.first, idx_median), Segment(idx_median, s.second)};
 }

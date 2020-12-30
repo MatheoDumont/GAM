@@ -560,17 +560,12 @@ void Mesh::incremental_delaunay(Point p)
     }
 }
 
-void Mesh::boite_englobante()
+void Mesh::boite_englobante(float k)
 {
-    double k = 100000.;
     sommets.emplace_back(-k, -k, 0.f);
     sommets.emplace_back(k, -k, 0.f);
     sommets.emplace_back(-k, k, 0.f);
     sommets.emplace_back(k, k, 0.f);
-    // sommets.emplace_back(0.f, 0.f, 0.f);
-    // sommets.emplace_back(k, 0.f, 0.f);
-    // sommets.emplace_back(0.f, k, 0.f);
-    // sommets.emplace_back(k, k, 0.f);
 
     triangles.emplace_back(1, 2, 3);
     triangles.emplace_back(2, 4, 3);

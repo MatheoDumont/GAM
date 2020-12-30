@@ -1,4 +1,5 @@
 #include "topography.h"
+#include <cmath>
 
 std::ostream &operator<<(std::ostream &o, const Sommet &s)
 {
@@ -25,7 +26,7 @@ void Triangle::update_3adj(int t1, int t2, int t3)
     adj3[2] = t3;
 }
 
-int Triangle::which_vertex(std::vector<Sommet> &ss, Sommet &o)
+int Triangle::which_vertex(const std::vector<Sommet> &ss, const Sommet &o) const
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -38,7 +39,7 @@ int Triangle::which_vertex(std::vector<Sommet> &ss, Sommet &o)
     return -1;
 }
 
-int Triangle::which_vertex(int idx_sommet)
+int Triangle::which_vertex(int idx_sommet) const
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -48,7 +49,7 @@ int Triangle::which_vertex(int idx_sommet)
     return -1;
 }
 
-int Triangle::which_adjacence(int idx_triangle)
+int Triangle::which_adjacence(int idx_triangle) const
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -107,4 +108,33 @@ Point Triangle::get_barycenter(const std::vector<Sommet> &ss)
         compute_barycenter(ss);
 
     return _barycenter;
+}
+
+float compute_angle(const Point &a, const Point &b, const Point &c)
+{
+    return acos(dot(normalize(a - b), normalize(a - c))) * 180.0 / M_PI;
+}
+
+std::array<float, 3> Triangle::angles(const std::vector<Sommet> &ss) const
+{
+    const Point &a = ss[s[0]].p;
+    const Point &b = ss[s[1]].p;
+    const Point &c = ss[s[2]].p;
+
+    float a1 = compute_angle(a, b, c);
+    float a2 = compute_angle(b, c, a);
+    float a3 = compute_angle(c, a, b);
+    std::cout << *this << std::endl;
+    std::cout << a1 << ", " << a2 << ", " << a3 << std::endl;
+    std::cout << "=================" << std::endl;
+
+    return {a1, a2, a3};
+}
+
+float Triangle::lowest_angle(const std::vector<Sommet> &ss) const
+{
+    using namespace std;
+    std::array<float, 3> a = angles(ss);
+
+    return min(min(a[0], a[1]), a[2]);
 }

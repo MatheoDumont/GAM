@@ -15,6 +15,7 @@
 #include <cassert>
 #include <chrono>
 #include <thread>
+#include <array>
 
 //** TP : TO MODIFY
 
@@ -52,8 +53,12 @@ public:
     std::vector<Point> load_points_cloud(std::string f);
 
     /*==================== Mesh Curvature ====================*/
+    float max_curvature;
+    float min_curvature;
 
     void compute_laplaciens();
+
+    void drawLaplacien();
 
     /*==================== Mesh Triangulation ====================*/
 
@@ -148,7 +153,7 @@ public:
     void incremental_delaunay(Point p);
 
     // construit la boite englobante, utile pour insertion seulement dans l'enveloppe convex
-    void boite_englobante();
+    void boite_englobante(float k = 1000.f);
 
     void check_adjacence();
 
@@ -158,10 +163,30 @@ public:
     void display_contour_crust();
 
     /*==================== Mesh Refinement ====================*/
+    typedef std::pair<int, int> Segment;
 
-    void ruppert();
-    void split_segment(std::pair<int,int> s);
+    void ruppert(float angle_min = 25.0);
 
+    // split et retourne les 2 segments resultant du split.
+    std::array<Segment, 2> split_segment(Segment s);
+
+    std::pair<int, float> worst_triangles_angle() const;
+
+    struct pairhash
+    {
+    public:
+        template <typename T, typename U>
+        std::size_t operator()(const std::pair<T, U> &x) const
+        {
+            return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
+        }
+    };
+
+    void in_circum_to_segments(const Point &p,
+                               const std::unordered_set<Segment, pairhash> &segments,
+                               std::unordered_set<Segment, pairhash> &out) const;
+
+    /*==================== Iterator et Circulator ====================*/
 
     typedef std::vector<Sommet>::iterator Iterator_on_vertices;
     typedef std::vector<Triangle>::iterator Iterator_on_faces;
@@ -298,6 +323,8 @@ public:
     void drawVoronoi();
 
     void dawContourCrust();
+
+    void drawCourbure();
 
     // ** TP Can be extended with further elements;
     Mesh _mesh;

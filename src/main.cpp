@@ -14,9 +14,22 @@ int main(int argc, char *argv[])
 
     return a.exec();
 
-    // // TEST ITERATOR ET CIRCULATOR
-    // Mesh titi;
-    // Mesh::Iterator_on_vertices its = titi.vertices_begin();
+    // TEST ITERATOR ET CIRCULATOR
+    Mesh titi;
+    Mesh::Iterator_on_vertices its = titi.vertices_begin();
+
+    Mesh::Circulator_on_faces cfbegin = titi.incident_faces(*its);
+    int cmpt = 0;
+    Mesh::Circulator_on_faces cf = cfbegin;
+
+    do
+    {
+        std::cout << *cf << std::endl;
+        cmpt++;
+        ++cf;
+    } while (cf != cfbegin);
+
+    std ::cout << "valence of the vertex " << cfbegin._get_idx_sommet() << " is " << cmpt << std ::endl;
 
     // for (its = titi.vertices_begin(); its != titi.vertices_end(); ++its)
     // {
@@ -32,7 +45,6 @@ int main(int argc, char *argv[])
 
     //     std ::cout << "valence of the vertex " << cfbegin._get_idx_sommet() << " is " << cmpt << std ::endl;
     // }
-    
 
     // TEST LAPLACIEN
     // std::vector<Point> v_l = Algorithm::vertices_laplacien(titi);
@@ -40,5 +52,4 @@ int main(int argc, char *argv[])
     // {
     //     std::cout << v_l[i] << std::endl;
     // }
-
 }
