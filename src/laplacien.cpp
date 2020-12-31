@@ -1,4 +1,4 @@
-#include "algorithm.h"
+#include "laplacien.h"
 
 double Algorithm::aire_triangle(const Point &a, const Point &b, const Point &c)
 {
@@ -40,11 +40,11 @@ float cot_geom(const Point &a, const Point &i, const Point &j)
     return cos_geom(a, i, j) / sin_geom(a, i, j);
 }
 
-double cot_geom_2(const Point &i, const Point &j, const Point &angle_point)
+double cot_geom_2(const Point &i, const Point &j, const Point &point_angle)
 {
 
-    Point a = normalize(i - angle_point);
-    Point b = normalize(j - angle_point);
+    Point a = normalize(i - point_angle);
+    Point b = normalize(j - point_angle);
 
     double cos_t = dot(a, b);
     double sin_t = norm(cross(a, b));
@@ -100,9 +100,6 @@ Point Algorithm::laplacien(Mesh &m, Sommet &sommet)
         const Point &k = m.sommets[t_precedent.s[(i_dans_t_prec + 1) % 3]].p;
         const Point &j = m.sommets[t_precedent.s[(i_dans_t_prec + 2) % 3]].p;
         const Point &kk = m.sommets[t_suivant.s[(i_dans_t_suiv + 2) % 3]].p;
-
-        // float cot_alpha = cot_geom(k, i, j);
-        // float cot_beta = cot_geom(kk, i, j);
 
         float cot_alpha = cot_geom_2(i, j, k);
         float cot_beta = cot_geom_2(i, j, kk);

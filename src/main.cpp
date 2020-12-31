@@ -2,7 +2,7 @@
 #include <QApplication>
 #include "mesh.h"
 #include <iostream>
-#include "algorithm.h"
+#include "laplacien.h"
 #include "point.h"
 
 int main(int argc, char *argv[])
@@ -15,21 +15,21 @@ int main(int argc, char *argv[])
     return a.exec();
 
     // TEST ITERATOR ET CIRCULATOR
-    Mesh titi;
-    Mesh::Iterator_on_vertices its = titi.vertices_begin();
+    // Mesh titi;
+    // Mesh::Iterator_on_vertices its = titi.vertices_begin();
 
-    Mesh::Circulator_on_faces cfbegin = titi.incident_faces(*its);
-    int cmpt = 0;
-    Mesh::Circulator_on_faces cf = cfbegin;
+    // Mesh::Circulator_on_faces cfbegin = titi.incident_faces(*its);
+    // int cmpt = 0;
+    // Mesh::Circulator_on_faces cf = cfbegin;
 
-    do
-    {
-        std::cout << *cf << std::endl;
-        cmpt++;
-        ++cf;
-    } while (cf != cfbegin);
+    // do
+    // {
+    //     std::cout << *cf << std::endl;
+    //     cmpt++;
+    //     ++cf;
+    // } while (cf != cfbegin);
 
-    std ::cout << "valence of the vertex " << cfbegin._get_idx_sommet() << " is " << cmpt << std ::endl;
+    // std ::cout << "valence of the vertex " << cfbegin._get_idx_sommet() << " is " << cmpt << std ::endl;
 
     // for (its = titi.vertices_begin(); its != titi.vertices_end(); ++its)
     // {

@@ -33,7 +33,7 @@ set(INCLUDES
   include/mainwindow.h 
   include/gldisplaywidget.h 
   include/mesh.h
-  include/algorithm.h
+  include/laplacien.h
   include/point.h
   include/topography.h
   include/color.h
@@ -44,7 +44,7 @@ set(SOURCES
   src/mainwindow.cpp 
   src/gldisplaywidget.cpp 
   src/mesh.cpp
-  src/algorithm.cpp
+  src/laplacien.cpp
   src/point.cpp
   src/topography.cpp
   src/mesh_triangulation.cpp

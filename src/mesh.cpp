@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "algorithm.h"
+#include "laplacien.h"
 #include <cassert>
 #include <chrono>
 #include <thread>
@@ -113,9 +113,9 @@ Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
     // Point infini
     this->make_inf_point();
-    boite_englobante(100);
+    boite_englobante(1);
     // ruppert();
-    crust();
+    // crust();
 
     // load_from_file("data/bunny.off");
 

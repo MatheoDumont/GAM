@@ -1,4 +1,4 @@
-#include "topography.h"
+#include "laplacien.h"
 #include <cmath>
 
 std::ostream &operator<<(std::ostream &o, const Sommet &s)
