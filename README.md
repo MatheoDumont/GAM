@@ -103,7 +103,7 @@ On obtient en suivant l'algo **Crust** :
 
 # TP 5
 
-L'algorithme de Rafinement de Maillage **Ruppert**.
+L'algorithme de Raffinement de Maillage **Ruppert**.
 
 
 
