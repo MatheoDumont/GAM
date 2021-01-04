@@ -30,6 +30,22 @@ void glPointDraw(const Point &p)
     glVertex3f(p._x, p._y, p._z);
 }
 
+static int _type_display = 0;
+void GeometricWorld::draw_which()
+{
+    if (_type_display == 0)
+        draw();
+    else if (_type_display == 1)
+        drawWireFrame();
+    else if (_type_display == 2)
+        drawVoronoi();
+    else if (_type_display == 3)
+        dawContourCrust();
+    else if (_type_display == 4)
+        drawCourbure();
+}
+
+
 //Example with a bBox
 void GeometricWorld::draw()
 {
@@ -111,26 +127,30 @@ void GeometricWorld::drawCourbure()
 
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
-
+    /******************** POUR TESTER ********************/
     // laplacien
     load_from_file("data/queen.off");
     compute_laplaciens();
-    
-    // delaunay
+    _type_display = 4;
+
     // voronoi et delaunay
     // this->make_inf_point();
     // boite_englobante(1);
+    // _type_display = 2;
 
     // crust
     // this->make_inf_point();
     // boite_englobante(1000);
     // crust();
+    // _type_display = 3;
 
     // ruppert
     // this->make_inf_point();
     // boite_englobante(1000);
     // ruppert();
-    
+    // _type_display = 2;
+
+    /*****************************************************/
 
     // load_from_file("data/bunny.off");
 

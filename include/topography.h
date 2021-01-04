@@ -26,7 +26,7 @@ struct Sommet
 };
 std::ostream &operator<<(std::ostream &o, const Sommet &s);
 
-struct Triangle
+struct Triangled
 {
 private:
     bool is_barycenter_computed = false;

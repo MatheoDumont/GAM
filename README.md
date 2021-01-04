@@ -53,6 +53,41 @@ Concernant l'organisation des fichiers:
 
 Les `.h` pour les fichiers `mesh_*` sont en faite un seul `.h` qui est `mesh.h`. 
 
+Tout le necessaire pour tester les algorithmes est disponible dans `mesh.cpp`.
+Dans `mesh.cpp`, a la ligne 112 se trouve le constructeur, il contient les methodes commentees a appeler pour
+tester chaque algorithme:
+```cpp
+Mesh::Mesh() : laplaciens(), sommets(), triangles()
+{
+    /******************** POUR TESTER ********************/
+    // laplacien
+    load_from_file("data/queen.off");
+    compute_laplaciens();
+    _type_display = 4;
+
+    // voronoi et delaunay
+    // this->make_inf_point();
+    // boite_englobante(1);
+    // _type_display = 2;
+
+    // crust
+    // this->make_inf_point();
+    // boite_englobante(1000);
+    // crust();
+    // _type_display = 3;
+
+    // ruppert
+    // this->make_inf_point();
+    // boite_englobante(1000);
+    // ruppert();
+    // _type_display = 2;
+
+    /*****************************************************/
+    ...
+```
+En faisant *clic droit*, vous pouvez a tout moment ajouter un point dans la triangulation, la methode `incremental_delaunay(Point)` sera appeler, elle se trouve dans `mesh_triangulation.cpp ligne 541`.
+
+
 
 ## I. Iterator et Circulator : FAIT
 L'implementation se trouve dans `mesh.h`, dans la classe `Mesh`.

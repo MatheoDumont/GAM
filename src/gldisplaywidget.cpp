@@ -8,8 +8,15 @@
 
 #include "QDebug"
 
-GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(4)
+GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0)
 {
+    /*
+     * 2 = Voronoi + Delaunay Wireframe
+     * 3 = Crust
+     * 4 = Laplacien
+     */
+    _type_display = 4;
+
     // Update the scene
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
     _timer.start(16); // Starts or restarts the timer with a timeout interval of 16 milliseconds.
@@ -66,16 +73,17 @@ void GLDisplayWidget::paintGL()
     glColor3f(0, 1, 0);
 
     // example with a tetraedre
-    if (_type_display == 0)
-        _geomWorld.draw();
-    else if (_type_display == 1)
-        _geomWorld.drawWireFrame();
-    else if (_type_display == 2)
-        _geomWorld.drawVoronoi();
-    else if (_type_display == 3)
-        _geomWorld.dawContourCrust();
-    else if (_type_display == 4)
-        _geomWorld.drawCourbure();
+    // if (_type_display == 0)
+    //     _geomWorld.draw();
+    // else if (_type_display == 1)
+    //     _geomWorld.drawWireFrame();
+    // else if (_type_display == 2)
+    //     _geomWorld.drawVoronoi();
+    // else if (_type_display == 3)
+    //     _geomWorld.dawContourCrust();
+    // else if (_type_display == 4)
+    //     _geomWorld.drawCourbure();
+    _geomWorld.draw_which();
 }
 
 void GLDisplayWidget::resizeGL(int width, int height)

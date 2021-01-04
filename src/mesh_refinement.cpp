@@ -121,7 +121,7 @@ void Mesh::ruppert(float angle_min)
             segments.insert(ss[1]);
         }
         segs_to_split.clear();
-        
+
         std::pair<int, float> worst = worst_triangles_angle();
         std::cout << worst.first << ", " << worst.second << std::endl;
         if (worst.second < angle_min)
@@ -170,9 +170,6 @@ std::array<Segment, 2> Mesh::split_segment(Segment s)
     }
     assert(idx_triangle_haut != -1);
 
-   
-
-    
     Triangle ancien_triangle_haut = triangles[idx_triangle_haut];
     int idx_rel_sommet_haut_gauche = ancien_triangle_haut.which_vertex(s.first);
     int idx_rel_sommet_haut_droite = ancien_triangle_haut.which_vertex(s.second);
@@ -256,6 +253,6 @@ std::array<Segment, 2> Mesh::split_segment(Segment s)
     triangles[idx_new_triangle_haut_droite] = new_triangle_haut_droite;
     triangles[idx_triangle_bas] = new_triangle_bas_gauche;
     triangles[idx_new_triangle_bas_droite] = new_triangle_bas_droite;
-    
+
     return {Segment(s.first, idx_median), Segment(idx_median, s.second)};
 }

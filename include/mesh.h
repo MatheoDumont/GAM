@@ -316,6 +316,8 @@ class GeometricWorld //Generally used to create a singleton instance
 public:
     GeometricWorld();
 
+    void draw_which();
+
     void draw();
 
     void drawWireFrame();
@@ -328,6 +330,9 @@ public:
 
     // ** TP Can be extended with further elements;
     Mesh _mesh;
+    // int _type_display;
+
+
 };
 
 #endif // MESH_H
