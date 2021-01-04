@@ -8,7 +8,7 @@
 
 #include "QDebug"
 
-GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(2)
+GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent), _X(0), _Y(0), _Z(0), _type_display(4)
 {
     // Update the scene
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));

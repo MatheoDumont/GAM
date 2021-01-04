@@ -111,16 +111,30 @@ void GeometricWorld::drawCourbure()
 
 Mesh::Mesh() : laplaciens(), sommets(), triangles()
 {
-    // Point infini
-    this->make_inf_point();
-    boite_englobante(1);
-    // ruppert();
+
+    // laplacien
+    load_from_file("data/queen.off");
+    compute_laplaciens();
+    
+    // delaunay
+    // voronoi et delaunay
+    // this->make_inf_point();
+    // boite_englobante(1);
+
+    // crust
+    // this->make_inf_point();
+    // boite_englobante(1000);
     // crust();
+
+    // ruppert
+    // this->make_inf_point();
+    // boite_englobante(1000);
+    // ruppert();
+    
 
     // load_from_file("data/bunny.off");
 
     // this->tetrahedron();
-    // load_from_file("data/queen.off");
     // load_from_file("data/cube.off");
     // this->compute_laplaciens();
     // this->edge_flip(0, 1);

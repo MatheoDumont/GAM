@@ -101,12 +101,12 @@ void Mesh::ruppert(float angle_min)
     std::unordered_set<Segment, pairhash> segments(graph_input.segments.begin(), graph_input.segments.end());
 
     std::unordered_set<Segment, pairhash> segs_to_split;
-    for (int i = 0; i < triangles.size(); ++i)
-    {
-        if (triangles[i].is_inf)
-            continue;
-        in_circum_to_segments(triangles[i].get_barycenter(sommets), segments, segs_to_split);
-    }
+    // for (int i = 0; i < triangles.size(); ++i)
+    // {
+    //     if (triangles[i].is_inf)
+    //         continue;
+    //     in_circum_to_segments(triangles[i].get_barycenter(sommets), segments, segs_to_split);
+    // }
 
     int compteur = 0;
     bool stop;
@@ -121,7 +121,7 @@ void Mesh::ruppert(float angle_min)
             segments.insert(ss[1]);
         }
         segs_to_split.clear();
-        break;
+        
         std::pair<int, float> worst = worst_triangles_angle();
         std::cout << worst.first << ", " << worst.second << std::endl;
         if (worst.second < angle_min)
@@ -135,6 +135,7 @@ void Mesh::ruppert(float angle_min)
             if (segs_to_split.size() == 0) // si aucun
                 incremental_delaunay(barycentre);
         }
+        break;
         compteur++;
         if (compteur == 2)
             stop = true;

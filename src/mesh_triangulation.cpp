@@ -457,7 +457,7 @@ void Mesh::add_delaunay_point(Point p)
 
     else // dans l'enveloppe convex
     {
-        std::cout << "INSIDE" << std::endl;
+        // std::cout << "INSIDE" << std::endl;
 
         // ON CONSIDERE T1 COMME ETANT LE TRIANGLE AYANT DEJA SUBIT DES
         // POTENTIELS FLIP, DONC T2 EST CELUI A MODIFIER PEUT ETRE
